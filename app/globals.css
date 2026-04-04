@@ -1,0 +1,189 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+
+:root {
+  --dp-bg: #050c14;
+  --dp-accent: #00f0ff;
+  --dp-hit: #ff003c;
+  --dp-disabled: #ff6a00;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: var(--dp-bg);
+  color: #c8e6ff;
+  font-family: 'Share Tech Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Radial glow background */
+body {
+  background-image: radial-gradient(ellipse at 50% 30%, #0d2137 0%, #050c14 70%);
+}
+
+/* CRT scanline overlay */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
+  );
+  z-index: 9999;
+}
+
+/* Grid cell base */
+.grid-cell {
+  border: 1px solid #0e4166;
+  background-color: #0d2137;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  user-select: none;
+}
+
+.grid-cell-attack:hover {
+  background-color: rgba(0, 240, 255, 0.08);
+  border-color: #00f0ff;
+  cursor: crosshair;
+}
+
+.grid-cell-attack:disabled {
+  cursor: not-allowed;
+}
+
+/* Glow utilities */
+.glow-cyan {
+  box-shadow: 0 0 8px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.glow-red {
+  box-shadow: 0 0 8px #ff003c, 0 0 20px rgba(255, 0, 60, 0.3);
+}
+
+.glow-orange {
+  box-shadow: 0 0 8px #ff6a00, 0 0 20px rgba(255, 106, 0, 0.3);
+}
+
+/* Hit cell */
+.cell-hit {
+  background-color: rgba(255, 0, 60, 0.35) !important;
+  border-color: #ff003c !important;
+  box-shadow: 0 0 6px #ff003c;
+  color: #ff003c;
+  font-weight: bold;
+}
+
+/* Miss cell */
+.cell-miss {
+  background-color: #1a3a5c !important;
+  border-color: #1a3a5c !important;
+  color: rgba(200, 230, 255, 0.3);
+}
+
+/* Core cell (own board, revealed) */
+.cell-core {
+  background-color: rgba(0, 240, 255, 0.12) !important;
+  border-color: rgba(0, 240, 255, 0.4) !important;
+}
+
+/* Disabled core cell */
+.cell-disabled {
+  background-color: rgba(255, 106, 0, 0.3) !important;
+  border-color: #ff6a00 !important;
+  box-shadow: 0 0 4px rgba(255, 106, 0, 0.5);
+  color: #ff6a00;
+}
+
+/* Placement preview — valid */
+.cell-preview-valid {
+  background-color: rgba(0, 240, 255, 0.2) !important;
+  border: 1px dashed #00f0ff !important;
+}
+
+/* Placement preview — invalid */
+.cell-preview-invalid {
+  background-color: rgba(255, 0, 60, 0.2) !important;
+  border: 1px dashed #ff003c !important;
+}
+
+/* Cyberpunk button */
+.btn-cyber {
+  border: 1px solid #00f0ff;
+  color: #00f0ff;
+  background: transparent;
+  padding: 0.5rem 1.5rem;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.btn-cyber:hover:not(:disabled) {
+  background-color: #00f0ff;
+  color: #050c14;
+  box-shadow: 0 0 12px #00f0ff, 0 0 30px rgba(0, 240, 255, 0.2);
+}
+
+.btn-cyber:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: #0e4166;
+  color: #0e4166;
+}
+
+.btn-cyber-danger {
+  border-color: #ff003c;
+  color: #ff003c;
+}
+
+.btn-cyber-danger:hover:not(:disabled) {
+  background-color: #ff003c;
+  color: #050c14;
+  box-shadow: 0 0 12px #ff003c;
+}
+
+/* Animate flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.animate-flicker {
+  animation: flicker 0.15s ease-in-out 3;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #050c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #0e4166;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #00f0ff;
+}
