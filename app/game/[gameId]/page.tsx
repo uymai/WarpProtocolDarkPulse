@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getOrCreatePlayerId } from '@/lib/uuid';
-import { subscribeToGame, placeBoard, fireShot } from '@/lib/firestore';
+import { subscribeToGame, placeBoard, fireShot, joinGame } from '@/lib/firestore';
 import { GameDocument, PlacedCore, CoreType, Orientation, Shot } from '@/types/game';
 import {
   CORE_DEFINITIONS,
@@ -43,6 +43,9 @@ export default function GamePage() {
   // Clipboard copy state
   const [copied, setCopied] = useState(false);
 
+  // Auto-join guard — prevent duplicate join attempts
+  const autoJoinAttemptedRef = useRef(false);
+
   // Init player ID
   useEffect(() => {
     setPlayerId(getOrCreatePlayerId());
@@ -57,6 +60,22 @@ export default function GamePage() {
     });
     return unsub;
   }, [gameId]);
+
+  // Auto-join when arriving via invite link during waiting phase
+  useEffect(() => {
+    if (!game || !playerId) return;
+    const isParticipant = game.playerOne === playerId || game.playerTwo === playerId;
+    if (
+      game.phase === 'waiting' &&
+      !isParticipant &&
+      !autoJoinAttemptedRef.current
+    ) {
+      autoJoinAttemptedRef.current = true;
+      joinGame(gameId, playerId).catch((e: unknown) => {
+        setError(e instanceof Error ? e.message : 'Failed to join game.');
+      });
+    }
+  }, [game, playerId, gameId]);
 
   // Detect new shot for notification
   useEffect(() => {
@@ -175,8 +194,9 @@ export default function GamePage() {
     }
   }
 
-  async function copyGameCode() {
-    await navigator.clipboard.writeText(gameId);
+  async function copyInviteLink() {
+    const url = `${window.location.origin}/game/${gameId}`;
+    await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -298,21 +318,25 @@ export default function GamePage() {
               className="text-dp-text/40 font-mono uppercase mb-2"
               style={{ fontSize: '0.6rem', letterSpacing: '0.15em' }}
             >
-              Protocol Code
+              Invite Link
             </div>
             <button
-              onClick={copyGameCode}
-              className="border border-dp-accent bg-dp-accent/5 px-6 py-3 font-mono tracking-widest text-dp-accent hover:bg-dp-accent/10 transition-all"
+              onClick={copyInviteLink}
+              className="border border-dp-accent bg-dp-accent/5 px-8 py-3 font-orbitron tracking-widest text-dp-accent hover:bg-dp-accent/10 transition-all"
               style={{
+                fontFamily: 'Orbitron, sans-serif',
                 boxShadow: '0 0 20px rgba(0,240,255,0.15)',
-                fontSize: '1.1rem',
+                fontSize: '0.75rem',
                 letterSpacing: '0.2em',
               }}
             >
-              {gameId}
+              {copied ? '✓ COPIED!' : 'COPY INVITE LINK'}
             </button>
             <div className="text-dp-text/30 text-xs font-mono mt-2">
-              {copied ? '✓ Copied!' : 'Click to copy — share with your opponent'}
+              {copied ? 'Link copied — send it to your opponent' : 'Share this link with your opponent'}
+            </div>
+            <div className="text-dp-text/20 text-xs font-mono mt-3">
+              or share code: {gameId}
             </div>
           </div>
         </div>
