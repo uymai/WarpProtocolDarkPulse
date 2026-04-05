@@ -54,10 +54,17 @@ export default function GamePage() {
   // Subscribe to game
   useEffect(() => {
     if (!gameId) return;
-    const unsub = subscribeToGame(gameId, (g) => {
-      setGame(g);
-      setLoading(false);
-    });
+    const unsub = subscribeToGame(
+      gameId,
+      (g) => {
+        setGame(g);
+        setLoading(false);
+      },
+      (err) => {
+        setError('Connection error — ' + err.message);
+        setLoading(false);
+      }
+    );
     return unsub;
   }, [gameId]);
 
@@ -203,7 +210,7 @@ export default function GamePage() {
 
   // --- Render ---
 
-  if (loading) {
+  if (loading || !playerId) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-dp-accent/60 font-orbitron tracking-widest animate-pulse"

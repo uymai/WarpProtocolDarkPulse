@@ -152,14 +152,19 @@ export async function fireShot(
 
 export function subscribeToGame(
   gameId: string,
-  callback: (game: GameDocument) => void
+  callback: (game: GameDocument) => void,
+  onError?: (error: Error) => void
 ): Unsubscribe {
   const ref = doc(db, GAMES, gameId);
-  return onSnapshot(ref, (snap) => {
-    if (snap.exists()) {
-      callback(toGameDocument(snap.id, snap.data() as Record<string, unknown>));
-    }
-  });
+  return onSnapshot(
+    ref,
+    (snap) => {
+      if (snap.exists()) {
+        callback(toGameDocument(snap.id, snap.data() as Record<string, unknown>));
+      }
+    },
+    onError
+  );
 }
 
 export async function getGame(gameId: string): Promise<GameDocument | null> {
