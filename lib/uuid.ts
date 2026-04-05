@@ -1,12 +1,32 @@
-import { v4 as uuidv4 } from 'uuid';
+import { signInAnonymously, onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 
-const STORAGE_KEY = 'wpdp_player_id';
+/**
+ * Signs in anonymously if not already signed in, then returns the Firebase UID.
+ * The UID is managed by Firebase Auth — it is NOT stored in localStorage and
+ * cannot be spoofed by modifying browser storage.
+ */
+export async function getOrCreatePlayerId(): Promise<string> {
+  if (auth.currentUser) return auth.currentUser.uid;
+  const result = await signInAnonymously(auth);
+  return result.user.uid;
+}
 
-export function getOrCreatePlayerId(): string {
-  if (typeof window === 'undefined') return '';
-  const existing = localStorage.getItem(STORAGE_KEY);
-  if (existing) return existing;
-  const id = uuidv4();
-  localStorage.setItem(STORAGE_KEY, id);
-  return id;
+/**
+ * Subscribes to Firebase Auth state. Triggers sign-in if not authenticated.
+ * Returns an unsubscribe function.
+ */
+export function subscribeToPlayerId(callback: (uid: string | null) => void): () => void {
+  return onAuthStateChanged(auth, async (user: User | null) => {
+    if (user) {
+      callback(user.uid);
+    } else {
+      try {
+        const result = await signInAnonymously(auth);
+        callback(result.user.uid);
+      } catch {
+        callback(null);
+      }
+    }
+  });
 }
