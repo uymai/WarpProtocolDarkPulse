@@ -24,7 +24,7 @@ npm run lint         # Run ESLint
 
 ## Environment Setup
 
-Copy `.env.local.example` to `.env.local` and fill in Firebase credentials:
+1. Copy `.env.local.example` to `.env.local` and fill in Firebase credentials:
 
 ```
 NEXT_PUBLIC_FIREBASE_API_KEY=
@@ -34,6 +34,9 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
 ```
+
+2. Enable **Anonymous Authentication** in the Firebase Console:
+   Firebase Console → Authentication → Sign-in method → Anonymous → Enable
 
 ## Project Structure
 
