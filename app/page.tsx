@@ -1,14 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getOrCreatePlayerId } from '@/lib/uuid';
+import { subscribeToPlayerId } from '@/lib/uuid';
 import LobbyForm from '@/components/LobbyForm';
 
 export default function Home() {
   const [playerId, setPlayerId] = useState('');
 
   useEffect(() => {
-    setPlayerId(getOrCreatePlayerId());
+    // Subscribe to Firebase Anonymous Auth — triggers sign-in if not yet authenticated.
+    // The UID comes from Firebase, not localStorage, so it cannot be spoofed.
+    return subscribeToPlayerId((uid) => {
+      if (uid) setPlayerId(uid);
+    });
   }, []);
 
   return (

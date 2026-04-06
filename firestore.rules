@@ -2,7 +2,48 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /games/{gameId} {
-      allow read, write: if true;
+
+      // ── Helpers ────────────────────────────────────────────────────────────
+      function isAuthenticated() {
+        return request.auth != null;
+      }
+
+      function isParticipant(gameData) {
+        return request.auth.uid == gameData.playerOne
+            || request.auth.uid == gameData.playerTwo;
+      }
+
+      function isParticipantIncoming() {
+        return request.auth.uid == request.resource.data.playerOne
+            || request.auth.uid == request.resource.data.playerTwo;
+      }
+
+      // ── Main game document ─────────────────────────────────────────────────
+
+      // Only participants can read the game state.
+      // Neither player can read the other's private board (stored in sub-collection).
+      allow read: if isAuthenticated() && isParticipant(resource.data);
+
+      // Create: authenticated users only; creator must be playerOne; safe initial state.
+      allow create: if isAuthenticated()
+        && request.resource.data.playerOne == request.auth.uid
+        && request.resource.data.playerTwo == null
+        && request.resource.data.phase == 'waiting'
+        && request.resource.data.winner == null
+        && request.resource.data.pendingShot == null
+        && request.resource.data.boardOnePlaced == false
+        && request.resource.data.boardTwoPlaced == false;
+
+      // Update: only existing participants may write.
+      allow update: if isAuthenticated() && isParticipant(resource.data);
+
+      // ── Private board sub-collection ───────────────────────────────────────
+      // Each player's core positions are stored here. Only that player can
+      // read or write their own board — the opponent has no access at all.
+      match /boards/{playerId} {
+        allow read, write: if isAuthenticated()
+          && request.auth.uid == playerId;
+      }
     }
   }
 }
